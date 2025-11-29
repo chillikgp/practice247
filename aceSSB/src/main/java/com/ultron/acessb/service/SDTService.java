@@ -1,5 +1,7 @@
 package com.ultron.acessb.service;
 
+import com.ultron.acessb.dto.SDTQuestionDto;
+import com.ultron.acessb.enums.SDTReviewStatus;
 import com.ultron.acessb.exception.AccountNotFoundException;
 import com.ultron.acessb.model.SDTAnswer;
 import com.ultron.acessb.model.SDTQuestion;
@@ -10,8 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -32,8 +36,6 @@ public class SDTService {
                 log.info("Returning all {} SDT questions", questions.size());
                 return questions;
             }
-
-            // return random 5
             Collections.shuffle(questions);
             List<SDTQuestion> randomFive = questions.stream().limit(5).toList();
 
@@ -56,7 +58,7 @@ public class SDTService {
 
             request.setVersion(newVersion);
             request.setCreatedTS(Instant.now());
-            request.setReviewStatus("PENDING");
+            request.setReviewStatus(SDTReviewStatus.pending.name());
 
             SDTAnswer saved = answerRepo.save(request);
 
@@ -117,17 +119,92 @@ public class SDTService {
         }
     }
 
-    public SDTQuestion insertQuestion(SDTQuestion question) {
+    public List<SDTQuestion> insertQuestion(List<SDTQuestionDto> questions) {
         try {
-            question.setStatus("ACTIVE");
-            SDTQuestion saved = questionRepo.save(question);
+            List<SDTQuestion> entities = questions.stream()
+                    .map(dto -> SDTQuestion.builder()
+                            .id(UUID.randomUUID().toString())
+                            .question(dto.getQuestion())
+                            .category(dto.getCategory())
+                            .status(dto.getStatus())
+                            .answer(dto.getAnswer())
+                            .build()
+                    )
+                    .toList();
 
-            log.info("SDT question inserted successfully. id={}", saved.getId());
-            return saved;
+            List<SDTQuestion> savedQuestions = questionRepo.saveAll(entities);
+
+            savedQuestions.forEach(q ->
+                    log.info("SDT question inserted successfully. id={}", q.getId())
+            );
+
+            return savedQuestions;
 
         } catch (Exception ex) {
-            log.error("Error inserting SDT question. text={}, error={}", question.getText(), ex.getMessage(), ex);
+            log.error("Error inserting SDT questions. size={}, error={}",
+                    questions.size(), ex.getMessage(), ex);
             throw ex;
         }
     }
+
+    public SDTAnswer updateReviewerComments(String accountId, int version, String reviewerComments) {
+        try {
+            SDTAnswer answer = answerRepo.findByAccountIdAndVersion(accountId, version)
+                    .orElseThrow(() -> new AccountNotFoundException("SDT entry not found"));
+
+            answer.setReviewerComments(reviewerComments);
+            answer.setReviewUpdateTS(Instant.now());
+
+            SDTAnswer updated = answerRepo.save(answer);
+
+            log.info("Reviewer generic comments updated for accountId={}, version={}", accountId, version);
+            return updated;
+
+        } catch (Exception ex) {
+            log.error("Error updating reviewer comments: {}", ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
+    public SDTAnswer updateReviewerCommentsOnQuestions(
+            String accountId,
+            int version,
+            List<SDTAnswer.QA> reviewerCommentsOnQuestion
+    ) {
+        try {
+            SDTAnswer answer = answerRepo.findByAccountIdAndVersion(accountId, version)
+                    .orElseThrow(() -> new AccountNotFoundException("SDT entry not found"));
+
+            answer.setReviewerCommentsOnQuestion(reviewerCommentsOnQuestion);
+            answer.setReviewUpdateTS(Instant.now());
+
+            SDTAnswer updated = answerRepo.save(answer);
+
+            log.info("Reviewer comments on individual questions updated for accountId={}, version={}", accountId, version);
+            return updated;
+
+        } catch (Exception ex) {
+            log.error("Error updating reviewer question comments: {}", ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+    public SDTAnswer updateAIComments(String accountId, int version, String aiReviewComments) {
+        try {
+            SDTAnswer answer = answerRepo.findByAccountIdAndVersion(accountId, version)
+                    .orElseThrow(() -> new AccountNotFoundException("SDT entry not found"));
+
+            answer.setAiReviewComments(aiReviewComments);
+            answer.setReviewUpdateTS(Instant.now());
+
+            SDTAnswer updated = answerRepo.save(answer);
+
+            log.info("AI review comments updated for accountId={}, version={}", accountId, version);
+            return updated;
+
+        } catch (Exception ex) {
+            log.error("Error updating AI review comments: {}", ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
 }

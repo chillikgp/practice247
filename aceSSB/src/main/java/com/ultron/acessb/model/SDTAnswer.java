@@ -20,6 +20,9 @@ public class SDTAnswer {
 
     private String reviewStatus;
     private String reviewerComments;
+    private String aiReviewComments;
+    private java.util.List<QA> reviewerCommentsOnQuestion;
+
 
     private Instant createdTS;
     private Instant reviewUpdateTS;
