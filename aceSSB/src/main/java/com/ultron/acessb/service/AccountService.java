@@ -2,6 +2,9 @@ package com.ultron.acessb.service;
 
 import com.ultron.acessb.dto.AccountUpdateRequest;
 import com.ultron.acessb.enums.AccountStatus;
+import com.ultron.acessb.enums.PIQReviewStatus;
+import com.ultron.acessb.enums.Role;
+import com.ultron.acessb.enums.SDTReviewStatus;
 import com.ultron.acessb.exception.AccountNotFoundException;
 import com.ultron.acessb.model.Account;
 import com.ultron.acessb.repository.AccountRepository;
@@ -97,6 +100,9 @@ public class AccountService {
                     .id(UUID.randomUUID().toString())
                     .accountId(System.currentTimeMillis() / 1000L)
                     .email(email)
+                    .role(Role.user.name())
+                    .piqStatus(PIQReviewStatus.not_started.name())
+                    .sdtStatus(SDTReviewStatus.not_started.name())
                     .status(AccountStatus.active.name())
                     .createdTS(Instant.now())
                     .updatedTS(Instant.now())

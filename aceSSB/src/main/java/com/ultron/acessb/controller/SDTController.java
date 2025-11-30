@@ -1,5 +1,6 @@
 package com.ultron.acessb.controller;
 
+import com.ultron.acessb.dto.SDTAnswerDto;
 import com.ultron.acessb.dto.UpdateAIReviewCommentsRequest;
 import com.ultron.acessb.dto.UpdateReviewerCommentsOnQuestionRequest;
 import com.ultron.acessb.dto.UpdateReviewerCommentsRequest;
@@ -40,8 +41,8 @@ public class SDTController {
      */
     @PostMapping("/answer/{accountId}")
     public ResponseEntity<SDTAnswer> submitAnswers(
-            @PathVariable String accountId,
-            @RequestBody SDTAnswer request
+            @PathVariable long accountId,
+            @RequestBody SDTAnswerDto request
     ) {
         log.info("Received SDT answers for accountId={}", accountId);
         request.setAccountId(accountId);
@@ -53,7 +54,7 @@ public class SDTController {
      * Get the latest SDT Answer version
      */
     @GetMapping("/answer/{accountId}/latest")
-    public ResponseEntity<SDTAnswer> getLatest(@PathVariable String accountId) {
+    public ResponseEntity<SDTAnswer> getLatest(@PathVariable long accountId) {
         log.info("Fetching latest SDT answers: accountId={}", accountId);
         return ResponseEntity.ok(service.getLatest(accountId));
     }
@@ -62,14 +63,14 @@ public class SDTController {
      * Get SDT Answer history (all versions sorted desc)
      */
     @GetMapping("/answer/{accountId}/history")
-    public ResponseEntity<List<SDTAnswer>> getHistory(@PathVariable String accountId) {
+    public ResponseEntity<List<SDTAnswer>> getHistory(@PathVariable long accountId) {
         log.info("Fetching SDT answer history: accountId={}", accountId);
         return ResponseEntity.ok(service.getHistory(accountId));
     }
 
     @PutMapping("/answer/{accountId}/{version}/reviewer-comments")
     public ResponseEntity<SDTAnswer> updateReviewerComments(
-            @PathVariable String accountId,
+            @PathVariable long accountId,
             @PathVariable int version,
             @RequestBody UpdateReviewerCommentsRequest request
     ) {
@@ -79,7 +80,7 @@ public class SDTController {
 
     @PutMapping("/answer/{accountId}/{version}/reviewer-question-comments")
     public ResponseEntity<SDTAnswer> updateReviewerCommentsOnQuestion(
-            @PathVariable String accountId,
+            @PathVariable long accountId,
             @PathVariable int version,
             @RequestBody UpdateReviewerCommentsOnQuestionRequest request
     ) {
@@ -91,7 +92,7 @@ public class SDTController {
 
     @PutMapping("/answer/{accountId}/{version}/ai-comments")
     public ResponseEntity<SDTAnswer> updateAIComments(
-            @PathVariable String accountId,
+            @PathVariable long accountId,
             @PathVariable int version,
             @RequestBody UpdateAIReviewCommentsRequest request
     ) {

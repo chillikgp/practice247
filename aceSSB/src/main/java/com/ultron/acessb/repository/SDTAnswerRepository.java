@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface SDTAnswerRepository extends MongoRepository<SDTAnswer, String> {
 
-    SDTAnswer findFirstByAccountIdOrderByVersionDesc(String accountId);
+    SDTAnswer findFirstByAccountIdOrderByVersionDesc(long accountId);
 
-    List<SDTAnswer> findByAccountIdOrderByVersionDesc(String accountId);
-    Optional<SDTAnswer> findByAccountIdAndVersion(String accountId, int version);
+    List<SDTAnswer> findByAccountIdOrderByVersionDesc(long accountId);
+    Optional<SDTAnswer> findByAccountIdAndVersion(long accountId, int version);
 
 }

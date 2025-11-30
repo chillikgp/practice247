@@ -1,5 +1,6 @@
 package com.ultron.acessb.service;
 
+import com.ultron.acessb.dto.SDTAnswerDto;
 import com.ultron.acessb.dto.SDTQuestionDto;
 import com.ultron.acessb.enums.SDTReviewStatus;
 import com.ultron.acessb.exception.AccountNotFoundException;
@@ -12,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -51,16 +51,21 @@ public class SDTService {
     /**
      * Save a new version of SDT answers
      */
-    public SDTAnswer saveNewVersion(SDTAnswer request) {
+    public SDTAnswer saveNewVersion(SDTAnswerDto request) {
         try {
             SDTAnswer latest = answerRepo.findFirstByAccountIdOrderByVersionDesc(request.getAccountId());
             int newVersion = (latest == null) ? 1 : latest.getVersion() + 1;
 
-            request.setVersion(newVersion);
-            request.setCreatedTS(Instant.now());
-            request.setReviewStatus(SDTReviewStatus.pending.name());
+            SDTAnswer newEntry = SDTAnswer.builder()
+                    .id(UUID.randomUUID().toString())
+                    .accountId(request.getAccountId())
+                    .answers(request.getAnswers())
+                    .version(newVersion)
+                    .createdTS(Instant.now())
+                    .reviewStatus(SDTReviewStatus.pending.name())
+                    .build();
 
-            SDTAnswer saved = answerRepo.save(request);
+            SDTAnswer saved = answerRepo.save(newEntry);
 
             log.info("Saved new SDT version {} for accountId={}", newVersion, request.getAccountId());
             return saved;
@@ -70,11 +75,10 @@ public class SDTService {
             throw ex;
         }
     }
-
     /**
      * Get latest SDT answers
      */
-    public SDTAnswer getLatest(String accountId) {
+    public SDTAnswer getLatest(long accountId) {
         try {
             SDTAnswer latest = answerRepo.findFirstByAccountIdOrderByVersionDesc(accountId);
 
@@ -98,7 +102,7 @@ public class SDTService {
     /**
      * Get history of all SDT answers (sorted desc)
      */
-    public List<SDTAnswer> getHistory(String accountId) {
+    public List<SDTAnswer> getHistory(long accountId) {
         try {
             List<SDTAnswer> history = answerRepo.findByAccountIdOrderByVersionDesc(accountId);
 
@@ -147,7 +151,7 @@ public class SDTService {
         }
     }
 
-    public SDTAnswer updateReviewerComments(String accountId, int version, String reviewerComments) {
+    public SDTAnswer updateReviewerComments(long accountId, int version, String reviewerComments) {
         try {
             SDTAnswer answer = answerRepo.findByAccountIdAndVersion(accountId, version)
                     .orElseThrow(() -> new AccountNotFoundException("SDT entry not found"));
@@ -167,7 +171,7 @@ public class SDTService {
     }
 
     public SDTAnswer updateReviewerCommentsOnQuestions(
-            String accountId,
+            long accountId,
             int version,
             List<SDTAnswer.QA> reviewerCommentsOnQuestion
     ) {
@@ -188,7 +192,7 @@ public class SDTService {
             throw ex;
         }
     }
-    public SDTAnswer updateAIComments(String accountId, int version, String aiReviewComments) {
+    public SDTAnswer updateAIComments(long accountId, int version, String aiReviewComments) {
         try {
             SDTAnswer answer = answerRepo.findByAccountIdAndVersion(accountId, version)
                     .orElseThrow(() -> new AccountNotFoundException("SDT entry not found"));
