@@ -1,13 +1,18 @@
 package com.ultron.acessb.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Document("piq_details")
 public class PIQDetails {
 
@@ -25,7 +30,8 @@ public class PIQDetails {
     private Instant createdTS;
     private Instant reviewerUpdateTS;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     public static class Details {
         private String firstName;
         private String lastName;

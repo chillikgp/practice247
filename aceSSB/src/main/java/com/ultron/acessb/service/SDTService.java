@@ -75,6 +75,7 @@ public class SDTService {
             throw ex;
         }
     }
+
     /**
      * Get latest SDT answers
      */
@@ -192,6 +193,7 @@ public class SDTService {
             throw ex;
         }
     }
+
     public SDTAnswer updateAIComments(long accountId, int version, String aiReviewComments) {
         try {
             SDTAnswer answer = answerRepo.findByAccountIdAndVersion(accountId, version)

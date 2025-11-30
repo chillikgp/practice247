@@ -11,6 +11,7 @@ public interface SDTAnswerRepository extends MongoRepository<SDTAnswer, String> 
     SDTAnswer findFirstByAccountIdOrderByVersionDesc(long accountId);
 
     List<SDTAnswer> findByAccountIdOrderByVersionDesc(long accountId);
+
     Optional<SDTAnswer> findByAccountIdAndVersion(long accountId, int version);
 
 }
